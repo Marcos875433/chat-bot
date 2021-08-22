@@ -1,0 +1,23 @@
+# reddit function []
+* [x] get image link
+  * [x] get png  
+  * [x] get jpg too, not only png
+  * [x] make sure that all the links and everything is the same, both for videos or images, and if they are posts only, ignore them
+  * [x] if jpg or png were not found, do the process again
+* [x] get post link
+  * You can do it either by regexing the page with the random post, or the random link after being visited, try the second one just in case
+
+* [] get the links from the random.json link
+  * [] make sure the bot grabs all the random.jsons e.g. "https://reddit.com//r/ubius/random.json?limit=1".
+  In the various subreddits whether it's nsfw or not,
+  as well as the random.json variants,
+  like https://www.reddit.com/r/dankmemes.json?sort=top&t=week,
+  see https://pastebin.com/1NziEPyW line 13, and take a look to this,
+  just in case: https://www.reddit.com/r/Discord_Bots/comments/9khght/pulling_random_images_from_subreddits_js/
+
+* [] make you can specify the subreddit
+$ optional (if u are bored, VERY BORED)
+  $ [] make you can search by tags
+% optional doubt, for videos
+
+# sub time left notify function
