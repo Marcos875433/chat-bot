@@ -1,18 +1,21 @@
+require('dotenv').config();
+
 const tmi = require('tmi.js');
 const request = require('request');
 
-import { botUserName, ouathToken, channelNames } from './constants';
+import { botUserName, channelNames, ouathToken} from 'constants'
 import { findImage } from './functions';
+
 
 const options = {
     options: {
         debug: true
     },
     identity: {
-        username: botUserName,
-        password: ouathToken
+        username: process.env.botUserName,
+        password: process.env.ouathToken
     },
-    channels: [channelNames]
+    channels: [process.env.channelNames]
 }
 
 const client = new tmi.client(options)
@@ -20,7 +23,7 @@ const client = new tmi.client(options)
 client.connect();
 
 client.on('connected', (adress, port) => {
-    client.action(channelNames,  `a`)
+    client.action(process.env.channelNames,  `a`)
 })
 
 client.on('chat', (target, ctx, message, self) => {
