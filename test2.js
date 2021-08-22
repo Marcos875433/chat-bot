@@ -1,2 +1,2 @@
 require = require('esm')(module/*, options*/)
-module.exports = require('./test1')
+module.exports = require('./test3')

@@ -1,4 +1,5 @@
-list
-/node_modules/
+node_modules
 guia.txt
 .env
+TODO
+src/constants.js
