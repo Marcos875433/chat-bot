@@ -69,4 +69,8 @@ if(minuscula.match(subredditRegex)) {
     if(minuscula === `,bridge`) {
         client.say(target, `Suscribe to PiewDiePie for original content TriHard 🌉`)
     }
+
+    if(minuscula === `,como`) {
+        client.say(target, `COMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO BabyRage`)
+    }
 });
