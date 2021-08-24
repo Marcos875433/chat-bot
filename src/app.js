@@ -35,18 +35,10 @@ client.on('chat', (target, ctx, message, self) => {
     const minuscula = spaces.toLowerCase();
     var subredditRegex = /(?<=\,reddit\s+)(\w+)/ig
 
-if(minuscula.match(subredditRegex)) {
-    var matchedSubreddit = minuscula.match(subredditRegex)
-    request({ //obtener el codigo fuente
-        url: "https://www.reddit.com/r/" + matchedSubreddit + "/random.json",
-        json: true
-        }, (err, response, body) => {
-        var str = (JSON.stringify(body, undefined, 4));
-        var rege = /((http[s]?|ftp):\/)?\/?(i.redd.it)\/([\w\-\.]+[^#?\s])(png|jpg|gif)(?=)/g
-        var rege2 = /\/r\/([\w\-\.]+)\/([\w\-\.]+)\/([\w\-\.]+)\/([\w\-\.]+)\//g
-        findImage(str, rege, rege2, target, client)
-    });
-}
+    if(minuscula.match(subredditRegex)) {
+        findImage(target, client, minuscula, subredditRegex)
+    }
+    
     if(minuscula === ',reddit') {
         client.say(target, `,reddit [subreddit]`)
     }
