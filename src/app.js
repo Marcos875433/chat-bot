@@ -2,8 +2,9 @@ require('dotenv').config();
 
 const tmi = require('tmi.js');
 const request = require('request');
+const fetch = require('node-fetch')
 
-import { findImage } from './functions';
+import { findImage, top } from './functions';
 
 const botUserName = process.env.botUserName;
 const ouathToken = process.env.ouathToken;
@@ -34,6 +35,7 @@ client.on('chat', (target, ctx, message, self) => {
     const spaces = message.trim();
     const minuscula = spaces.toLowerCase();
     var subredditRegex = /(?<=\,reddit\s+)(\w+)/ig
+    var topRegex = /(?<=\,top\s+)(\w+)/ig
 
     if(minuscula.match(subredditRegex)) {
         var matchedSubreddit = minuscula.match(subredditRegex)
@@ -41,7 +43,7 @@ client.on('chat', (target, ctx, message, self) => {
             url: "https://www.reddit.com/r/" + matchedSubreddit + "/random.json",
             json: true
             }, (err, response, body) => {
-            var str = (JSON.stringify(body, undefined, 4));
+            let str = (JSON.stringify(body, undefined, 4));
             if(response.statusCode == 429) {
                 client.say(target, `error 429 monkaS`)
             }
@@ -51,8 +53,19 @@ client.on('chat', (target, ctx, message, self) => {
         });
     }
 
-    if(minuscula === `,top`) {
-        client.say(target, `comando en desarrollo MrDestructoid`)
+    if(minuscula.match(topRegex)) {
+        var topSubreddit = minuscula.match(topRegex)
+        request({ //obtener el codigo fuente
+            url: "https://www.reddit.com/r/" + topSubreddit + ".json?sort=top&t=week",
+            json: true
+            }, (err, response, body) => {
+            let str = (JSON.stringify(body, undefined, 4));
+            if(response.statusCode == 429) {
+                client.say(target, `error 429 monkaS`)
+            }
+            var rege = /(?<=(http[s]?|ftp):\/?\/?i\.)redd\.it\/([\w\-\.]+[^#?\s])(png|jpg|gif)(?=)/g
+            top(str, rege, target, client)
+        });
     }
     
     if(minuscula === ',reddit') {
