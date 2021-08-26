@@ -3,22 +3,24 @@ require('dotenv').config();
 const tmi = require('tmi.js');
 const request = require('request');
 const fetch = require('node-fetch')
+const fs = require('fs')
 
-import { findImage, top } from './functions';
+import { findImage, top, addChannel } from './functions';
 
 const botUserName = process.env.botUserName;
 const ouathToken = process.env.ouathToken;
-const channelNames = process.env.channelNames;
+var channelNames = ["#srsarcasmo01","#darkness_lalo874","clark_eit"]
 
 const options = {
     options: {
-        debug: true
+        debug: true,
+        joinInterval: 2000
     },
     identity: {
         username: botUserName,
         password: ouathToken
     },
-    channels: [channelNames]
+    channels: channelNames
 }
 
 const client = new tmi.client(options)
@@ -26,17 +28,38 @@ const client = new tmi.client(options)
 client.connect();
 
 client.on('connected', (adress, port) => {
-    client.action(channelNames,  `a`)
-})
+    console.log('a')
+});
 
-client.on('chat', (target, ctx, message, self) => {
+client.on("join", (channel, username) => {
+    if(botUserName == username) {
+        client.action(channel, `a`)
+    }
+});
+
+
+client.on('chat', (target, ctx, message, self, channel) => {
     if (self) return;
 
     const spaces = message.trim();
     const minuscula = spaces.toLowerCase();
     var subredditRegex = /(?<=\,reddit\s+)(\w+)/ig
     var topRegex = /(?<=\,top\s+)(\w+)/ig
+    var checkUser = '#' + ctx.username
 
+    var isInList = channelNames.indexOf(checkUser) !== -1;
+
+    console.log(ctx.username)
+    if(target === '#srsarcasmo01' && minuscula === ',join' && isInList === false) {
+        channelNames.push(ctx.username)
+        var newArray = JSON.stringify(channelNames)
+        addChannel(newArray, client, target)
+    }
+
+    if(minuscula === ',join' && isInList) {
+        client.say(target, `eres un MAMA HUEVAZO BabyRage, ya esta el bot unido a tu chat`)
+    }
+    
     if(minuscula.match(subredditRegex)) {
         var matchedSubreddit = minuscula.match(subredditRegex)
         request({ //obtener el codigo fuente
@@ -94,4 +117,4 @@ client.on('chat', (target, ctx, message, self) => {
     if(minuscula === `,como`) {
         client.say(target, `COMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO BabyRage`)
     }
-});
+}); 
