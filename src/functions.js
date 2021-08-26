@@ -1,5 +1,6 @@
 const request = require('request')
 const fetch = require('node-fetch')
+const fs = require('fs')
 
 export function findImage(strParameter, regeParameter, regeParameter2, idk, cliente) {
 
@@ -82,4 +83,21 @@ export async function top(strParameter, regeParameter, idk, cliente) {
         return
     }
         
+}
+
+export function addChannel(nwarr, cliente, idk) {
+
+    fs.readFile('./src/app.js', 'utf-8', function(err, data) {
+        if (err) throw err;
+    
+        var newValue = data.replace(/(?<=var\schannelNames\s\=\s)(\[((\'|\")(.*))*\])/ig, nwarr);
+
+        cliente.say(idk, `voy FireSpeed`)
+    
+        fs.writeFile('./src/app.js', newValue, 'utf-8', function(err, data) {
+        if (err) throw err;
+        })
+    })
+    
+    return
 }
