@@ -85,7 +85,7 @@ export async function top(strParameter, regeParameter, idk, cliente) {
         
 }
 
-export function addChannel(nwarr, cliente, idk) {
+export function addChannel(nwarr, cliente, idk) { // nwarr stands for "new array"
 
     fs.readFile('./src/app.js', 'utf-8', function(err, data) {
         if (err) throw err;
@@ -98,6 +98,87 @@ export function addChannel(nwarr, cliente, idk) {
         if (err) throw err;
         })
     })
-    
+
     return
+}
+
+Date.prototype.getUTCTime = function () { // Added custom prototype to get current utc time in milliseconds
+    return this.getTime() - (this.getTimezoneOffset() * 60000); // this line gets TimezoneOffset in minutes, and multiplies that to 60,000 to get that time in milliseconds and substract the result from the current local time in milliseconds converting "Date()" to milliseconds using the "getTime()" method
+};
+
+function msToTime(duration) { // converts ms Time to a readeable time
+    var milliseconds = (duration % 1000) / 1000,
+    seconds = Math.floor((duration / 1000) % 60),
+    minutes = Math.floor((duration / (1000 * 60)) % 60),
+    hours = Math.floor(duration / (1000 * 60 * 60));
+
+    if (hours >= 24) {
+        var days = Math.floor(hours / 24)
+        hours = hours % 24
+
+        if (days >= 30) {
+            days = days % 30
+            var Months = Math.floor(days / 30)
+        }
+    }
+
+    //hours = (hours < 10) ? "0" + hours : hours;
+    //minutes = (minutes < 10) ? "0" + minutes : minutes;
+
+    var fullSeconds = seconds + milliseconds // milliseconds.toString().split('.')[1]
+    //fullSeconds = (seconds < 10) ? "0" + fullSeconds : fullSeconds;
+
+    if (days) {
+        return days + "d, " + hours + "h, " + minutes + "m, and " + fullSeconds + "s";
+    } else if (Months) {
+        return Months + "M, " + days + "d, " + hours + "h, " + minutes + "m, and " + fullSeconds + "s";
+    } else {
+        return hours + "h, " + minutes + "m, and " + fullSeconds + "s"; 
+    }
+}
+
+function checkSub(cliente, idk, str) {
+    str = JSON.parse(str)
+    var endDateMs = str.subscribed ? Date.parse(str.meta.endsAt) : Date.parse(str.cumulative.end) // parse end sub Date ISO string to milliseconds
+    var timestamp = new Date().getUTCTime() // get current UTC time in milliseconds
+    if (str.subscribed) { // if the user is subscribed do this
+        endDateMs -= timestamp // substracts the current UTC time in milliseconds from the sub's end Date in milliseconds 
+        var subEndDate = msToTime(endDateMs)
+        if (str.meta.type === "gift") {
+            cliente.say(idk, `The user ${str.username} has been susbscribed to ${str.channel} with a 
+            tier ${str.meta.tier} gifted sub from ${str.meta.gift.name} during ${str.cumulative.months} cumulative 
+            months with a ${str.streak.months} month strake [Ends/renews in ${subEndDate}]`)
+        } else {
+            cliente.say(idk, `The user ${str.username} has been susbscribed to ${str.channel} with a 
+                tier ${str.meta.tier} ${str.meta.type} sub during ${str.cumulative.months} cumulative 
+                months with a ${str.streak.months} month strake [Ends/renews in ${subEndDate}]`)
+        }
+    } else {
+        if (str.cumulative.months) {
+            timestamp -= endDateMs
+            var subEndedDate = msToTime(timestamp)
+            cliente.say(idk, `${str.username} is not subscribed to ${str.channel} but has had a ${str.cumulative.months} months subscription [Ended ${subEndedDate} ago]`)
+        } else if (str.hidden) {
+            cliente.say(idk, `The ${str.channel} channel is not partnered/affiliated`)
+        } else {
+            cliente.say(idk, `The user ${str.username} has never been subscribed to ${str.channel}`)
+        }
+    }
+}
+
+export function getSub(cliente, idk, {...kwargs} = {}) {
+    let userSub = kwargs.saParameter ? (kwargs.saParameter[1] ? kwargs.saParameter[1] : kwargs.elContextoPapuBv) : kwargs.elContextoPapuBv
+    let channelSub = kwargs.saParameter ? (kwargs.saParameter[2] ? kwargs.saParameter[2] : kwargs.currChannel) : kwargs.currChannel
+    
+    request({ //obtener el codigo fuente
+        url: `https://api.ivr.fi/twitch/subage/${userSub}/${channelSub}`,
+        json: true
+        }, (err, response, body) => {
+        let str = (JSON.stringify(body, undefined, 4)); // the "str" is an object here, if you wanna access a property, just do this e.g. "console.log(str.username)" this prints "DarKness_Lalo874"
+        if(response.statusCode == 429) {
+            cliente.say(idk, `error 429 monkaS`)
+        }
+        console.log(str)
+        checkSub(cliente, idk, str)
+    });
 }
