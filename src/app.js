@@ -5,7 +5,7 @@ const request = require('request');
 const fetch = require('node-fetch')
 const fs = require('fs')
 
-import { findImage, top, addChannel } from './functions';
+import { findImage, top, addChannel, getSub } from './functions';
 
 const botUserName = process.env.botUserName;
 const ouathToken = process.env.ouathToken;
@@ -37,8 +37,9 @@ client.on("join", (channel, username) => {
     }
 });
 
+var saBlock = false;
 
-client.on('chat', (target, ctx, message, self, channel) => {
+client.on('chat', (target, ctx, message, self) => {
     if (self) return;
 
     const spaces = message.trim();
@@ -47,17 +48,17 @@ client.on('chat', (target, ctx, message, self, channel) => {
     var topRegex = /(?<=\,top\s+)(\w+)/ig
     var checkUser = '#' + ctx.username
 
-    var isInList = channelNames.indexOf(checkUser) !== -1;
+    var isInList = channelNames.includes(checkUser); // channelNames.indexOf(checkUser) !== -1;
 
     console.log(ctx.username)
-    if(target === '#srsarcasmo01' && minuscula === ',join' && isInList === false) {
-        channelNames.push(ctx.username)
-        var newArray = JSON.stringify(channelNames)
-        addChannel(newArray, client, target)
-    }
-
-    if(minuscula === ',join' && isInList) {
-        client.say(target, `eres un MAMA HUEVAZO BabyRage, ya esta el bot unido a tu chat`)
+    if(target === '#srsarcasmo01' && minuscula === ',join') {
+        if (!isInList) {
+            channelNames.push(ctx.username)
+            var newArray = JSON.stringify(channelNames)
+            addChannel(newArray, client, target)
+        } else {
+           client.say(target, `eres un MAMA HUEVAZO BabyRage, ya esta el bot unido a tu chat`) 
+        }
     }
     
     if(minuscula.match(subredditRegex)) {
@@ -70,7 +71,7 @@ client.on('chat', (target, ctx, message, self, channel) => {
             if(response.statusCode == 429) {
                 client.say(target, `error 429 monkaS`)
             }
-            var rege = /((http[s]?|ftp):\/)?\/?(i.redd.it)\/([\w\-\.]+[^#?\s])(png|jpg|gif)(?=)/g
+            var rege = /((http[s]?|ftp):\/)?\/?(i.redd.it)\/([\w\-\.]+[^#?\s])(png|jpg|gif)/g
             var rege2 = /\/r\/([\w\-\.]+)\/([\w\-\.]+)\/([\w\-\.]+)\/([\w\-\.]+)\//g
             findImage(str, rege, rege2, target, client)
         });
@@ -86,7 +87,7 @@ client.on('chat', (target, ctx, message, self, channel) => {
             if(response.statusCode == 429) {
                 client.say(target, `error 429 monkaS`)
             }
-            var rege = /(?<=(http[s]?|ftp):\/?\/?i\.)redd\.it\/([\w\-\.]+[^#?\s])(png|jpg|gif)(?=)/g
+            var rege = /(?<=(http[s]?|ftp):\/?\/?i\.)redd\.it\/([\w\-\.]+[^#?\s])(png|jpg|gif)/g
             top(str, rege, target, client)
         });
     }
@@ -111,10 +112,32 @@ client.on('chat', (target, ctx, message, self, channel) => {
     }
 
     if(minuscula === `,bridge`) {
-        client.say(target, `Suscribe to PiewDiePie for original content TriHard 🌉`)
+        client.say(target, `Subscribe to PiewDiePie for original content TriHard 🌉`)
     }
 
     if(minuscula === `,como`) {
         client.say(target, `COMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO BabyRage`)
     }
-}); 
+
+    if(minuscula.match(/^\,sa/i)) { // if the start of the comment match with ",sa" do this
+        if (!saBlock) { // if sa is not blocked/timed out
+            var sa = minuscula.split(' ')
+            if (sa.length > 3) {
+                client.say(target, `NOPERS`)
+            } else if (sa.length === 3) {
+                getSub(client, target, {saParameter: sa})
+            } else {
+                var chan = target.replace('#', '')
+                if (sa.length === 2) {
+                    getSub(client, target, {saParameter: sa, currChannel: chan})
+                } else {
+                    getSub(client, target, {elContextoPapuBv: ctx.username, currChannel: chan})
+                }
+            }
+            saBlock = true;
+            setTimeout(() => {
+                saBlock = false;
+            }, 5000);
+        }
+    }
+});
