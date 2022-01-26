@@ -1,6 +1,14 @@
-const request = require('request')
-const fetch = require('node-fetch')
-const fs = require('fs')
+require('dotenv').config();
+const request = require('request');
+const fetch = require('node-fetch');
+const fs = require('fs');
+const admin = require('firebase-admin');
+const PasteClient = require("pastebin-api").default;
+const searchGameVods = require("./search-vods/utils/searchGameVods");
+
+const TOKEN = process.env.BearerToken;
+const Client_ID = process.env.Client_ID;
+const paste = new PasteClient(process.env.pastebin_dev_key);
 
 export function findImage(strParameter, regeParameter, regeParameter2, idk, cliente) {
 
@@ -85,24 +93,73 @@ export async function top(strParameter, regeParameter, idk, cliente) {
         
 }
 
-export function addChannel(nwarr, cliente, idk) { // nwarr stands for "new array"
+export function fireConfig() {
 
-    fs.readFile('./src/app.js', 'utf-8', function(err, data) {
-        if (err) throw err;
+    const GOOGLE_APPLICATION_CREDENTIALS = {
+      "type": process.env.type,
+      "project_id": process.env.project_id,
+      "private_key_id": process.env.private_key_id,
+      "private_key": process.env.private_key,
+      "client_email": process.env.client_email,
+      "client_id": process.env.client_id,
+      "auth_uri": process.env.auth_uri,
+      "token_uri": process.env.token_uri,
+      "auth_provider_x509_cert_url": process.env.auth_provider_x509_cert_url,
+      "client_x509_cert_url": process.env.client_x509_cert_url
+    }
+
+    admin.initializeApp({
+        credential: admin.credential.cert(GOOGLE_APPLICATION_CREDENTIALS),
+        databaseURL: process.env.DATA_BASE_URL
+    });
+};
+
+export async function checkList(db) {
+    const channelRef = db.ref('channelsList');
+    return new Promise((resolve, reject) => {
+        channelRef.once('value', (snap) => {
+            var channels = snap.val();
+            channels = Object.values(channels);
+            resolve(channels);
+        });
+    });
+};
+
+export async function checkChannel(db, username, cliente, idk, channelNames) {
+    var channels = await checkList(db);
+    if(!channels.includes(username)) {
+        const db = fireConfig();
+        const channelRef = db.ref('channelsList');
+        channelRef.push('#' + username);
+        channelNames.push('#' + username);
+        cliente.say(idk, `voy FireSpeed`);
+        client.join(username);
+    } else {
+        cliente.say(idk, `eres un MAMA HUEVAZO BabyRage, ya esta el bot unido a tu chat`);
+    };
+};
+
+export function checkConnection() {
+    try {
+        const db = declareDB();
     
-        var newValue = data.replace(/(?<=var\schannelNames\s\=\s)(\[((\'|\")(.*))*\])/ig, nwarr);
-
-        cliente.say(idk, `voy FireSpeed`)
-    
-        fs.writeFile('./src/app.js', newValue, 'utf-8', function(err, data) {
-        if (err) throw err;
-        })
-    })
-
-    return
+        const connectedRef = db.ref(".info/connected");
+        connectedRef.once('value', (snap) => {
+            if(snap.val() === true) {
+                console.log('conectadisimo chavalin');
+            }
+        });
+    } catch(error) {
+        console.error(error.message);
+        let daMessage = 'The default Firebase app does not exist. Make ' +
+            'sure you call initializeApp() before using any of the Firebase services.'
+        if(error.message === daMessage) {
+            return false;
+        }
+    }
 }
 
-Date.prototype.getUTCTime = function () { // Added custom prototype to get current utc time in milliseconds
+Date.prototype.getUTCTime = function () {
     return this.getTime() - (this.getTimezoneOffset() * 60000); // this line gets TimezoneOffset in minutes, and multiplies that to 60,000 to get that time in milliseconds and substract the result from the current local time in milliseconds converting "Date()" to milliseconds using the "getTime()" method
 };
 
@@ -181,4 +238,96 @@ export function getSub(cliente, idk, {...kwargs} = {}) {
         console.log(str)
         checkSub(cliente, idk, str)
     });
+}
+
+export async function getFollows(user_id) {
+    const options = {method: "GET", headers: {'Client-ID': Client_ID, 'Authorization': `Bearer ${TOKEN}`}};
+
+    var daFollows = [];
+    for (let i = 0;; i++) {
+        let daURL = `https://api.twitch.tv/helix/users/follows?from_id=${user_id}&first=100`;
+        const laTest = await fetch(i === 0 ? daURL : daURL + `&after=${daFollows[i - 1].pagination.cursor}`, options);
+        const daJson = await laTest.json();
+        daFollows[i] = daJson;
+
+        if (Object.keys(daJson.pagination).length === 0) break;
+
+    }
+
+    let daFo = [];
+
+    for (let daResponse of daFollows) {
+        daResponse.data.forEach((daFollow) => {
+
+            daFo.push(daFollow.to_login);
+
+        });
+    }
+
+    return [daFo, daFollows[0].total];
+}
+
+export async function getCatsPlayed(followed = false, daGame, {...kwargs} = {}) {
+
+    // para conseguir tu token ve a twitch pulsa F12 y ve a Application > Cookies > twitch.tv > auth-token
+    const token = process.env.oauthToken_gql;
+
+    if (followed) {
+        var streamersPlayed = [];
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+        const user_id = kwargs.user_id;
+        const game = daGame;
+        const daFollowsResponse = await getFollows(user_id); // 0 to get follows, 1 to get number of follows
+        const following = daFollowsResponse[0];
+        var leNumOfFollows = daFollowsResponse[1];
+
+        for (let [i, follow] of following.entries()) {
+            var vods = await searchGameVods(follow, token, game);
+            if (vods) streamersPlayed.push(vods[0]);
+            if(i !== following.length - 1) await sleep(2500);
+        };
+
+    } else {
+        const channel = kwargs.daChannel;
+        console.log(channel);
+        // tiene que estar bien escrito(no toma GTAV porque twitch lo guarda como Grand Theft Auto V)
+        // no importan las mayusculas
+        const game = daGame;
+        console.log(game);
+
+        var vods = await searchGameVods(channel, token, game);
+    }
+
+    if (!followed) {
+
+        if (!vods || !vods[0]) { // if the response "searchGameVods" is an empty array
+            return 'No Streamer Sadge';
+
+        } else if (vods[0] === kwargs.daChannel) {
+            return 'STREAMER';
+        }
+    } else {
+        return [streamersPlayed, leNumOfFollows];
+    }
+
+
+    return vods;
+};
+
+export async function doPastebinShit(daText) {
+    const url = await client.createPaste({
+        code: daText,
+        expireDate: "10M",
+        name: "yourStreamerList.js",
+        publicity: 0,
+    });
+    return url;
+}
+
+export async function getBotID(botUserName) {
+    const options = {method: "GET", headers: {'Client-ID': Client_ID, 'Authorization': `Bearer ${TOKEN}`}};
+    const response = await fetch(`https://api.twitch.tv/helix/users?login=${botUserName}`, options);
+    const json = await response.json();
+
+    return json.data[0].id;
 }

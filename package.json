@@ -1,24 +1,29 @@
 {
   "name": "srbot02",
   "version": "1.0.0",
-  "description": "",
+  "description": "twitch-bot",
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "vods": "node src/search-vods/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.4",
+    "bluebird": "^3.7.2",
     "dotenv": "^10.0.0",
     "esm": "^3.2.25",
+    "firebase-admin": "^10.0.1",
     "jquery": "^3.6.0",
-    "node-fetch": "^2.6.6",
+    "node-fetch": "^2.6.7",
     "nodemon": "^2.0.15",
+    "pastebin-api": "^3.0.0",
     "random-reddit": "^2.0.1",
     "request": "^2.88.2",
+    "shlex": "^2.1.0",
     "snoowrap": "^1.23.0",
     "tmi.js": "^1.8.5",
     "url-regex-safe": "^2.0.2"
