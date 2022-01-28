@@ -148,7 +148,7 @@ client.on('chat', async(target, ctx, message, self) => {
         let streamed = split(minuscula);
         if (streamed.length === 3) {
             if (streamed[1] === 'followed') {
-                const daUserID = self ? await getBotID('umaruteichan_spacecat') : ctx['user-id'];
+                const daUserID = self ? await getBotID(botUserName) : ctx['user-id'];
                 const daResponse = await getCatsPlayed(true, streamed[2], {user_id: daUserID});
                 if (!daResponse) {
                     client.say(target, `Algo salio mal FeelsDankMan`);
