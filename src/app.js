@@ -45,6 +45,8 @@ client.on("join", (channel, username) => {
 
 var saBlock = false;
 
+var streamedBlock = false;
+
 client.on('chat', async(target, ctx, message, self) => {
     // if (self) return;
 
@@ -141,32 +143,39 @@ client.on('chat', async(target, ctx, message, self) => {
         }
     }
 
-    if(minuscula.match(/^\,streamed(?![\w\d])/i)) { // ,streamed - [streamer] [game] || ["followed"] [game]
+    if(minuscula.match(/^\,streamed(?![\w\d])/i) && !streamedBlock) { // ,streamed - [streamer] [game] || ["followed"] [game]
+        streamedBlock = true;
         let streamed = split(minuscula);
         if (streamed.length === 3) {
             if (streamed[1] === 'followed') {
-                const daUserID = self ? await getBotID(botUserName) : ctx['user-id'];
+                const daUserID = self ? await getBotID('umaruteichan_spacecat') : ctx['user-id'];
                 const daResponse = await getCatsPlayed(true, streamed[2], {user_id: daUserID});
                 if (!daResponse) {
                     client.say(target, `Algo salio mal FeelsDankMan`);
+                    streamedBlock = false;
                 } else {
                     const daStreamers = daResponse[0].join(', ');
                     const daAmountOfStreamers = daResponse[1];
                     if(daStreamers.length > 500) {
                         const daPaste = await doPastebinShit(daStreamers);
                         client.say(target, `Aqui esta la lista de streamers que han jugado ${streamed[2]} -> ${daPaste} , son ${daAmountOfStreamers} streamers PogChamp`);
+                        streamedBlock = false;
                     } else {
                         client.say(target, `${daStreamers}`);
+                        streamedBlock = false;
                     }
                 }
             } else {
                 const daResponse = await getCatsPlayed(false, streamed[2], {daChannel: streamed[1]});
                 if (!daResponse) {
                     client.say(target, `Algo salio mal FeelsDankMan`);
+                    streamedBlock = false;
                 } else if (daResponse === 'STREAMER') {
                     client.say(target, `Si, tu streamer ha stremeado ${streamed[2]}`);
+                    streamedBlock = false;
                 } else if (daResponse === `No Streamer Sadge`) {
                     client.say(target, `Tu Streamer no ha stremeado esa PORONGA KEKW`);
+                    streamedBlock = false;
                 }
             }
         }

@@ -115,7 +115,7 @@ export function fireConfig() {
 };
 
 export async function checkList(db) {
-    const channelRef = db.ref('channelsList');
+    const channelRef = db.ref('channelsTest');
     return new Promise((resolve, reject) => {
         channelRef.once('value', (snap) => {
             var channels = snap.val();
@@ -129,11 +129,11 @@ export async function checkChannel(db, username, cliente, idk, channelNames) {
     var channels = await checkList(db);
     if(!channels.includes(username)) {
         const db = fireConfig();
-        const channelRef = db.ref('channelsList');
+        const channelRef = db.ref('channelsTest');
         channelRef.push('#' + username);
         channelNames.push('#' + username);
         cliente.say(idk, `voy FireSpeed`);
-        client.join(username);
+        cliente.join(username);
     } else {
         cliente.say(idk, `eres un MAMA HUEVAZO BabyRage, ya esta el bot unido a tu chat`);
     };
@@ -269,8 +269,9 @@ export async function getFollows(user_id) {
 
 export async function getCatsPlayed(followed = false, daGame, {...kwargs} = {}) {
 
-    // para conseguir tu token ve a twitch pulsa F12 y ve a Application > Cookies > twitch.tv > auth-token
-    const token = process.env.oauthToken_gql;
+    // abrir twitch sin estar loggeado, abrir la devtool y seleccionar cualquier call a la api gql
+    // buscar el header Client-Id
+    const client_id = process.env.client_id_gql;
 
     if (followed) {
         var streamersPlayed = [];
@@ -282,8 +283,9 @@ export async function getCatsPlayed(followed = false, daGame, {...kwargs} = {}) 
         var leNumOfFollows = daFollowsResponse[1];
 
         for (let [i, follow] of following.entries()) {
-            var vods = await searchGameVods(follow, token, game);
-            if (vods) streamersPlayed.push(vods[0]);
+            var vods = await searchGameVods(follow, client_id, game);
+            if (vods ? vods[0] : vods) streamersPlayed.push(vods[0]);
+            console.log(streamersPlayed);
             if(i !== following.length - 1) await sleep(2500);
         };
 
@@ -295,7 +297,7 @@ export async function getCatsPlayed(followed = false, daGame, {...kwargs} = {}) 
         const game = daGame;
         console.log(game);
 
-        var vods = await searchGameVods(channel, token, game);
+        var vods = await searchGameVods(channel, client_id, game);
     }
 
     if (!followed) {
