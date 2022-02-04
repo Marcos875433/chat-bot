@@ -49,11 +49,16 @@ async function getVodsMoments(client_id, vods) {
         const request = await fetch(gqlAPI, options);
         const json = await request.json();
 
-        json.forEach((vod) => {
-            vod.data.video.moments.edges.forEach((moment) => {
-                moments.push(moment);
+        try {
+            json.forEach((vod) => {
+                vod.data.video.moments.edges.forEach((moment) => {
+                    moments.push(moment);
+                });
             });
-        });
+        } catch(err) {
+            console.log(json, 'getVodsMoments json');
+            console.log(err.message);
+        }
     }
 
     return moments;
