@@ -5,6 +5,7 @@ const fs = require('fs');
 const admin = require('firebase-admin');
 const PasteClient = require("pastebin-api").default;
 const searchGameVods = require("./search-vods/utils/searchGameVods");
+const pLimit = require('p-limit');
 
 const TOKEN = process.env.BearerToken;
 const Client_ID = process.env.Client_ID;
@@ -12,41 +13,41 @@ const paste = new PasteClient(process.env.pastebin_dev_key);
 
 export function findImage(strParameter, regeParameter, regeParameter2, idk, cliente) {
 
-    var randomImage = strParameter.match(regeParameter)
-    var randomPost = strParameter.match(regeParameter2)
+    var randomImage = strParameter.match(regeParameter);
+    var randomPost = strParameter.match(regeParameter2);
     
     if (randomImage === null) {
-        var regeBan = /\{\s+\"reason\"\:\s\"banned\"\,\s+\"message\"\:\s\"not\sfound\"\,\s+\"error\"\:\s404\s+\}/ig
-        var regeExist = /(\{\s+(\"kind\")\:\s(\"listing\")\,\s+(\"data\")\:\s\{\s+(\"after\")\:\s(null)\,\s+(\"dist\")\:\s(0)\,\s+(\"modhash\")\:\s(\"[\w\W]*\")\,\s+(\"geo\_filter\")\:\s(\"\")\,\s+(\"children\")\:\s(\[\])\,\s+(\"before\")\:\s(null)\s+\}\s+\})|(\{\s+\"message\"\:\s\"not\sfound\"\,\s+\"error\"\:\s404\s+\})/ig
-        var regePrivate = /\{\s+\"reason\"\:\s\"private\"\,\s+\"message\"\:\s\"forbidden\"\,\s+\"error\"\:\s403\s+\}/ig
+        var regeBan = /\{\s+\"reason\"\:\s\"banned\"\,\s+\"message\"\:\s\"not\sfound\"\,\s+\"error\"\:\s404\s+\}/ig;
+        var regeExist = /(\{\s+(\"kind\")\:\s(\"listing\")\,\s+(\"data\")\:\s\{\s+(\"after\")\:\s(null)\,\s+(\"dist\")\:\s(0)\,\s+(\"modhash\")\:\s(\"[\w\W]*\")\,\s+(\"geo\_filter\")\:\s(\"\")\,\s+(\"children\")\:\s(\[\])\,\s+(\"before\")\:\s(null)\s+\}\s+\})|(\{\s+\"message\"\:\s\"not\sfound\"\,\s+\"error\"\:\s404\s+\})/ig;
+        var regePrivate = /\{\s+\"reason\"\:\s\"private\"\,\s+\"message\"\:\s\"forbidden\"\,\s+\"error\"\:\s403\s+\}/ig;
         if(randomPost !== null) {
-            cliente.say(idk, `no encontre ni una TONTA IMAGEN BabyRage intenta otra vez TONTO`)
+            cliente.say(idk, `no encontre ni una TONTA IMAGEN BabyRage intenta otra vez TONTO`);
         } else if(strParameter.match(regeBan)) {
-            cliente.say(idk, `ese reddit esta BAN BabyRage`)
+            cliente.say(idk, `ese reddit esta BAN BabyRage`);
         } else if(strParameter.match(regeExist)) {
-            cliente.say(idk, `ese reddit ni si quiera EXISTE BabyRage`)
+            cliente.say(idk, `ese reddit ni si quiera EXISTE BabyRage`);
         } else if(strParameter.match(regePrivate)) {
-            cliente.say(idk, `ese reddit es PRIVADISIMO BabyRage`)
+            cliente.say(idk, `ese reddit es PRIVADISIMO BabyRage`);
         }
     } else {
         for (let i = 0; i < 1; i++) {
             var image = randomImage[i];
             var post = randomPost[i];
         }
-        cliente.say(idk, `${image} PogChamp, y aqui esta el tonto POST BabyRage https://www.reddit.com${post}`)
-        return
+        cliente.say(idk, `${image} PogChamp, y aqui esta el tonto POST BabyRage https://www.reddit.com${post}`);
+        return;
     }
 
 }
 
 export async function top(strParameter, regeParameter, idk, cliente) {
 
-    var randomImages = strParameter.match(regeParameter)
+    var randomImages = strParameter.match(regeParameter);
     if(randomImages !== null) {
-        var chosenImage = randomImages[Math.floor(Math.random() * randomImages.length)]
+        var chosenImage = randomImages[Math.floor(Math.random() * randomImages.length)];
     }
     if(randomImages === null) {
-        var chosenImage = null
+        var chosenImage = null;
     }
     const response = await fetch("https://www.reddit.com/search.json?q=site:redd.it+url:" + chosenImage, {
         "headers": {
@@ -70,25 +71,25 @@ export async function top(strParameter, regeParameter, idk, cliente) {
     var strResponse = await response.text();
     
 
-    var rege2 = /\/r\/([\w\-\.]+)\/([\w\-\.]+)\/([\w\-\.]+)\/([\w\-\.]+)\//g
-    var randomPost = strResponse.match(rege2)
+    var rege2 = /\/r\/([\w\-\.]+)\/([\w\-\.]+)\/([\w\-\.]+)\/([\w\-\.]+)\//g;
+    var randomPost = strResponse.match(rege2);
 
     if (randomImages === null) {
-        var regeBan = /\{\s+\"reason\"\:\s\"banned\"\,\s+\"message\"\:\s\"not\sfound\"\,\s+\"error\"\:\s404\s+\}/ig
-        var regeExist = /(\{\s+(\"kind\")\:\s(\"listing\")\,\s+(\"data\")\:\s\{\s+(\"after\")\:\s(null)\,\s+(\"dist\")\:\s(0)\,\s+(\"modhash\")\:\s(\"[\w\W]*\")\,\s+(\"geo\_filter\")\:\s(\"\")\,\s+(\"children\")\:\s(\[\])\,\s+(\"before\")\:\s(null)\s+\}\s+\})|(\{\s+\"message\"\:\s\"not\sfound\"\,\s+\"error\"\:\s404\s+\})/ig
-        var regePrivate = /\{\s+\"reason\"\:\s\"private\"\,\s+\"message\"\:\s\"forbidden\"\,\s+\"error\"\:\s403\s+\}/ig
+        var regeBan = /\{\s+\"reason\"\:\s\"banned\"\,\s+\"message\"\:\s\"not\sfound\"\,\s+\"error\"\:\s404\s+\}/ig;
+        var regeExist = /(\{\s+(\"kind\")\:\s(\"listing\")\,\s+(\"data\")\:\s\{\s+(\"after\")\:\s(null)\,\s+(\"dist\")\:\s(0)\,\s+(\"modhash\")\:\s(\"[\w\W]*\")\,\s+(\"geo\_filter\")\:\s(\"\")\,\s+(\"children\")\:\s(\[\])\,\s+(\"before\")\:\s(null)\s+\}\s+\})|(\{\s+\"message\"\:\s\"not\sfound\"\,\s+\"error\"\:\s404\s+\})/ig;
+        var regePrivate = /\{\s+\"reason\"\:\s\"private\"\,\s+\"message\"\:\s\"forbidden\"\,\s+\"error\"\:\s403\s+\}/ig;
         if(strParameter.match(regeBan)) {
-            cliente.say(idk, `ese reddit esta BAN BabyRage`)
+            cliente.say(idk, `ese reddit esta BAN BabyRage`);
         } else if(strParameter.match(regeExist)) {
-            cliente.say(idk, `ese reddit ni si quiera EXISTE BabyRage`)
+            cliente.say(idk, `ese reddit ni si quiera EXISTE BabyRage`);
         } else if(strParameter.match(regePrivate)) {
-            cliente.say(idk, `ese reddit es PRIVADISIMO BabyRage`)
+            cliente.say(idk, `ese reddit es PRIVADISIMO BabyRage`);
         } else {
-            cliente.say(idk, `no encontre ni una TONTA IMAGEN BabyRage intenta otra vez TONTO`)
+            cliente.say(idk, `no encontre ni una TONTA IMAGEN BabyRage intenta otra vez TONTO`);
         }
     } else {       
-        cliente.say(idk, `https://i.${chosenImage} PogChamp, y aqui esta el tonto POST BabyRage https://www.reddit.com${randomPost[0]}`)
-        return
+        cliente.say(idk, `https://i.${chosenImage} PogChamp, y aqui esta el tonto POST BabyRage https://www.reddit.com${randomPost[0]}`);
+        return;
     }
         
 }
@@ -112,10 +113,10 @@ export function fireConfig() {
         credential: admin.credential.cert(GOOGLE_APPLICATION_CREDENTIALS),
         databaseURL: process.env.DATA_BASE_URL
     });
-};
+}
 
 export async function checkList(db) {
-    const channelRef = db.ref('channelsTest');
+    const channelRef = db.ref('channelsList');
     return new Promise((resolve, reject) => {
         channelRef.once('value', (snap) => {
             var channels = snap.val();
@@ -123,21 +124,21 @@ export async function checkList(db) {
             resolve(channels);
         });
     });
-};
+}
 
 export async function checkChannel(db, username, cliente, idk, channelNames) {
     var channels = await checkList(db);
     if(!channels.includes(username)) {
         const db = fireConfig();
-        const channelRef = db.ref('channelsTest');
+        const channelRef = db.ref('channelsList');
         channelRef.push('#' + username);
         channelNames.push('#' + username);
         cliente.say(idk, `voy FireSpeed`);
         cliente.join(username);
     } else {
         cliente.say(idk, `eres un MAMA HUEVAZO BabyRage, ya esta el bot unido a tu chat`);
-    };
-};
+    }
+}
 
 export function checkConnection() {
     try {
@@ -152,7 +153,7 @@ export function checkConnection() {
     } catch(error) {
         console.error(error.message);
         let daMessage = 'The default Firebase app does not exist. Make ' +
-            'sure you call initializeApp() before using any of the Firebase services.'
+            'sure you call initializeApp() before using any of the Firebase services.';
         if(error.message === daMessage) {
             return false;
         }
@@ -161,7 +162,7 @@ export function checkConnection() {
 
 Date.prototype.getUTCTime = function () {
     return this.getTime() - (this.getTimezoneOffset() * 60000); // this line gets TimezoneOffset in minutes, and multiplies that to 60,000 to get that time in milliseconds and substract the result from the current local time in milliseconds converting "Date()" to milliseconds using the "getTime()" method
-};
+}
 
 function msToTime(duration) { // converts ms Time to a readeable time
     var milliseconds = (duration % 1000) / 1000,
@@ -170,20 +171,20 @@ function msToTime(duration) { // converts ms Time to a readeable time
     hours = Math.floor(duration / (1000 * 60 * 60));
 
     if (hours >= 24) {
-        var days = Math.floor(hours / 24)
-        hours = hours % 24
+        var days = Math.floor(hours / 24);
+        hours = hours % 24;
 
         if (days >= 30) {
-            days = days % 30
-            var Months = Math.floor(days / 30)
+            days = days % 30;
+            var Months = Math.floor(days / 30);
         }
     }
 
-    //hours = (hours < 10) ? "0" + hours : hours;
-    //minutes = (minutes < 10) ? "0" + minutes : minutes;
+    // hours = (hours < 10) ? "0" + hours : hours;
+    // minutes = (minutes < 10) ? "0" + minutes : minutes;
 
     var fullSeconds = seconds + milliseconds // milliseconds.toString().split('.')[1]
-    //fullSeconds = (seconds < 10) ? "0" + fullSeconds : fullSeconds;
+    // fullSeconds = (seconds < 10) ? "0" + fullSeconds : fullSeconds;
 
     if (days) {
         return days + "d, " + hours + "h, " + minutes + "m, and " + fullSeconds + "s";
@@ -196,36 +197,36 @@ function msToTime(duration) { // converts ms Time to a readeable time
 
 function checkSub(cliente, idk, str) {
     str = JSON.parse(str)
-    var endDateMs = str.subscribed ? Date.parse(str.meta.endsAt) : Date.parse(str.cumulative.end) // parse end sub Date ISO string to milliseconds
-    var timestamp = new Date().getUTCTime() // get current UTC time in milliseconds
+    var endDateMs = str.subscribed ? Date.parse(str.meta.endsAt) : Date.parse(str.cumulative.end); // parse end sub Date ISO string to milliseconds
+    var timestamp = new Date().getUTCTime(); // get current UTC time in milliseconds
     if (str.subscribed) { // if the user is subscribed do this
-        endDateMs -= timestamp // substracts the current UTC time in milliseconds from the sub's end Date in milliseconds 
-        var subEndDate = msToTime(endDateMs)
+        endDateMs -= timestamp; // substracts the current UTC time in milliseconds from the sub's end Date in milliseconds 
+        var subEndDate = msToTime(endDateMs);
         if (str.meta.type === "gift") {
             cliente.say(idk, `The user ${str.username} has been susbscribed to ${str.channel} with a 
             tier ${str.meta.tier} gifted sub from ${str.meta.gift.name} during ${str.cumulative.months} cumulative 
-            months with a ${str.streak.months} month strake [Ends/renews in ${subEndDate}]`)
+            months with a ${str.streak.months} month strake [Ends/renews in ${subEndDate}]`);
         } else {
             cliente.say(idk, `The user ${str.username} has been susbscribed to ${str.channel} with a 
                 tier ${str.meta.tier} ${str.meta.type} sub during ${str.cumulative.months} cumulative 
-                months with a ${str.streak.months} month strake [Ends/renews in ${subEndDate}]`)
+                months with a ${str.streak.months} month strake [Ends/renews in ${subEndDate}]`);
         }
     } else {
         if (str.cumulative.months) {
-            timestamp -= endDateMs
-            var subEndedDate = msToTime(timestamp)
-            cliente.say(idk, `${str.username} is not subscribed to ${str.channel} but has had a ${str.cumulative.months} months subscription [Ended ${subEndedDate} ago]`)
+            timestamp -= endDateMs;
+            var subEndedDate = msToTime(timestamp);
+            cliente.say(idk, `${str.username} is not subscribed to ${str.channel} but has had a ${str.cumulative.months} months subscription [Ended ${subEndedDate} ago]`);
         } else if (str.hidden) {
-            cliente.say(idk, `The ${str.channel} channel is not partnered/affiliated`)
+            cliente.say(idk, `The ${str.channel} channel is not partnered/affiliated`);
         } else {
-            cliente.say(idk, `The user ${str.username} has never been subscribed to ${str.channel}`)
+            cliente.say(idk, `The user ${str.username} has never been subscribed to ${str.channel}`);
         }
     }
 }
 
 export function getSub(cliente, idk, {...kwargs} = {}) {
-    let userSub = kwargs.saParameter ? (kwargs.saParameter[1] ? kwargs.saParameter[1] : kwargs.elContextoPapuBv) : kwargs.elContextoPapuBv
-    let channelSub = kwargs.saParameter ? (kwargs.saParameter[2] ? kwargs.saParameter[2] : kwargs.currChannel) : kwargs.currChannel
+    let userSub = kwargs.saParameter ? (kwargs.saParameter[1] ? kwargs.saParameter[1] : kwargs.elContextoPapuBv) : kwargs.elContextoPapuBv;
+    let channelSub = kwargs.saParameter ? (kwargs.saParameter[2] ? kwargs.saParameter[2] : kwargs.currChannel) : kwargs.currChannel;
     
     request({ //obtener el codigo fuente
         url: `https://api.ivr.fi/twitch/subage/${userSub}/${channelSub}`,
@@ -233,10 +234,10 @@ export function getSub(cliente, idk, {...kwargs} = {}) {
         }, (err, response, body) => {
         let str = (JSON.stringify(body, undefined, 4)); // the "str" is an object here, if you wanna access a property, just do this e.g. "console.log(str.username)" this prints "DarKness_Lalo874"
         if(response.statusCode == 429) {
-            cliente.say(idk, `error 429 monkaS`)
+            cliente.say(idk, `error 429 monkaS`);
         }
-        console.log(str)
-        checkSub(cliente, idk, str)
+        console.log(str);
+        checkSub(cliente, idk, str);
     });
 }
 
@@ -274,20 +275,29 @@ export async function getCatsPlayed(followed = false, daGame, {...kwargs} = {}) 
     const client_id = process.env.client_id_gql;
 
     if (followed) {
+        let daPromises = [];
         var streamersPlayed = [];
         const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
         const user_id = kwargs.user_id;
         const game = daGame;
         const daFollowsResponse = await getFollows(user_id); // 0 to get follows, 1 to get number of follows
         const following = daFollowsResponse[0];
-        var leNumOfFollows = daFollowsResponse[1];
+        const limit = pLimit(25);
 
         for (let [i, follow] of following.entries()) {
-            var vods = await searchGameVods(follow, client_id, game);
-            if (vods ? vods[0] : vods) streamersPlayed.push(vods[0]);
-            console.log(streamersPlayed);
-            if(i !== following.length - 1) await sleep(2500);
+            daPromises.push(limit(() => searchGameVods(follow, client_id, game)));
+            // if(i !== following.length - 1) await sleep(2500);
         };
+
+        streamersPlayed = await Promise.all(daPromises);
+
+        streamersPlayed = streamersPlayed.filter(item => item);
+
+        streamersPlayed.forEach((miniArray, deIndex) => {
+            for (let [i, daString] of miniArray.entries()) {
+                streamersPlayed[deIndex] = daString;
+            }
+        });
 
     } else {
         const channel = kwargs.daChannel;
@@ -309,7 +319,7 @@ export async function getCatsPlayed(followed = false, daGame, {...kwargs} = {}) 
             return 'STREAMER';
         }
     } else {
-        return [streamersPlayed, leNumOfFollows];
+        return [streamersPlayed, streamersPlayed.length];
     }
 
 
@@ -317,7 +327,7 @@ export async function getCatsPlayed(followed = false, daGame, {...kwargs} = {}) 
 };
 
 export async function doPastebinShit(daText) {
-    const url = await client.createPaste({
+    const url = await paste.createPaste({
         code: daText,
         expireDate: "10M",
         name: "yourStreamerList.js",
@@ -326,10 +336,22 @@ export async function doPastebinShit(daText) {
     return url;
 }
 
-export async function getBotID(botUserName) {
+export async function getUserID(userID) {
     const options = {method: "GET", headers: {'Client-ID': Client_ID, 'Authorization': `Bearer ${TOKEN}`}};
-    const response = await fetch(`https://api.twitch.tv/helix/users?login=${botUserName}`, options);
+    const response = await fetch(`https://api.twitch.tv/helix/users?login=${userID}`, options);
     const json = await response.json();
 
     return json.data[0].id;
+}
+
+export async function gameExists(deGame) {
+    const options = {method: "GET", headers: {'Client-ID': Client_ID, 'Authorization': `Bearer ${TOKEN}`}};
+
+    const response = await fetch(`https://api.twitch.tv/helix/games?name=${deGame}`, options);
+    const json = await response.json();
+    if (!json.data[0]) {
+        return false;
+    } else {
+        return true;
+    }
 }

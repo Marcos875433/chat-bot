@@ -6,7 +6,8 @@ async function searchGameVods(channel, client_id, game) {
     const response = [];
 
     const vods = await getVods(channel, client_id);
-    if (vods === 'The channel has no vods') return;
+    if (vods === 'The channel has no vods') return false; // no vods
+    if (vods === 'The channel is closed, or has been banned') return false; // channels closed or banned
     const moments = await getVodsMoments(client_id, vods);
 
     for (let vod of vods) {
@@ -45,7 +46,7 @@ async function searchGameVods(channel, client_id, game) {
         }
     }
 
-    return response;
+    return false; // if the channel hasn't streamed your game
 }
 
 module.exports = searchGameVods;

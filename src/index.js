@@ -1,2 +1,2 @@
-require = require('esm')(module/*, options*/)
-module.exports = require('./app')
+require = require('esm')(module/*, options*/);
+module.exports = require('./app');

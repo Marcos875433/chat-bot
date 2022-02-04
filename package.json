@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "vods": "node src/search-vods/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +19,7 @@
     "jquery": "^3.6.0",
     "node-fetch": "^2.6.7",
     "nodemon": "^2.0.15",
+    "p-limit": "3.1.0",
     "pastebin-api": "^3.0.0",
     "random-reddit": "^2.0.1",
     "request": "^2.88.2",
@@ -27,5 +27,6 @@
     "snoowrap": "^1.23.0",
     "tmi.js": "^1.8.5",
     "url-regex-safe": "^2.0.2"
-  }
+  },
+  "devDependencies": {}
 }
