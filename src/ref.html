@@ -1,0 +1,357 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <style>
+        li {
+            list-style: none;
+        }
+        .user-display-link :hover {
+            text-decoration: underline;
+        }
+        .user-display-link {
+            border-bottom-color: rgb(92, 22, 197);
+            border-bottom-style: none;
+            border-bottom-width: 0px;
+            border-image-outset: 0;
+            border-image-repeat: stretch;
+            border-image-slice: 100%;
+            border-image-source: none;
+            border-image-width: 1;
+            border-left-color: rgb(92, 22, 197);
+            border-left-style: none;
+            border-left-width: 0px;
+            border-right-color: rgb(92, 22, 197);
+            border-right-style: none;
+            border-right-width: 0px;
+            border-top-color: rgb(92, 22, 197);
+            border-top-style: none;
+            border-top-width: 0px;
+            box-sizing: border-box;
+            color: rgb(92, 22, 197);
+            font-family: "Inter", "Roobert", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-feature-settings: normal;
+            font-kerning: auto;
+            font-language-override: normal;
+            font-optical-sizing: auto;
+            font-size: 13px;
+            font-size-adjust: none;
+            font-stretch: 100%;
+            font-style: normal;
+            font-variant: normal;
+            font-variant-alternates: normal;
+            font-variant-caps: normal;
+            font-variant-east-asian: normal;
+            font-variant-ligatures: normal;
+            font-variant-numeric: normal;
+            font-variant-position: normal;
+            font-variation-settings: normal;
+            font-weight: 400;
+            line-height: 20px;
+            list-style-image: none;
+            list-style-position: inside;
+            list-style-type: none;
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            text-decoration: rgb(92, 22, 197);
+            text-decoration-color: rgb(92, 22, 197);
+            text-decoration-line: none;
+            text-decoration-style: solid;
+            text-decoration-thickness: auto;
+            vertical-align: baseline;
+            word-break: break-word;
+        }
+        .user-display {
+            /*border-bottom-color: rgb(30, 144, 255);*/
+            border-bottom-style: none;
+            border-bottom-width: 0px;
+            border-image-outset: 0;
+            border-image-repeat: stretch;
+            border-image-slice: 100%;
+            border-image-source: none;
+            border-image-width: 1;
+            /*border-left-color: rgb(30, 144, 255);*/
+            border-left-style: none;
+            border-left-width: 0px;
+            /*border-right-color: rgb(30, 144, 255);*/
+            border-right-style: none;
+            border-right-width: 0px;
+            /*border-top-color: rgb(30, 144, 255);*/
+            border-top-style: none;
+            border-top-width: 0px;
+            box-sizing: border-box;
+            /*color: rgb(30, 144, 255);*/
+            font-family: "Inter", "Roobert", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-feature-settings: normal;
+            font-kerning: auto;
+            font-language-override: normal;
+            font-optical-sizing: auto;
+            font-size: 13px;
+            font-size-adjust: none;
+            font-stretch: 100%;
+            font-style: normal;
+            font-variant: normal;
+            font-variant-alternates: normal;
+            font-variant-caps: normal;
+            font-variant-east-asian: normal;
+            font-variant-ligatures: normal;
+            font-variant-numeric: normal;
+            font-variant-position: normal;
+            font-variation-settings: normal;
+            font-weight: 700;
+            line-height: 20px;
+            list-style-image: none;
+            list-style-position: inside;
+            list-style-type: none;
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            vertical-align: baseline;
+            word-break: break-word;
+        }
+        .chat-badge {
+            border-bottom-color: rgb(92, 22, 197);
+            border-bottom-style: none;
+            border-bottom-width: 0px;
+            border-image-outset: 0;
+            border-image-repeat: stretch;
+            border-image-slice: 100%;
+            border-image-source: none;
+            border-image-width: 1;
+            border-left-color: rgb(92, 22, 197);
+            border-left-style: none;
+            border-left-width: 0px;
+            border-right-color: rgb(92, 22, 197);
+            border-right-style: none;
+            border-right-width: 0px;
+            border-top-color: rgb(92, 22, 197);
+            border-top-style: none;
+            border-top-width: 0px;
+            box-sizing: border-box;
+            color: rgb(92, 22, 197);
+            font-family: "Inter", "Roobert", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-feature-settings: normal;
+            font-kerning: auto;
+            font-language-override: normal;
+            font-optical-sizing: auto;
+            font-size: 13px;
+            font-size-adjust: none;
+            font-stretch: 100%;
+            font-style: normal;
+            font-variant: normal;
+            font-variant-alternates: normal;
+            font-variant-caps: normal;
+            font-variant-east-asian: normal;
+            font-variant-ligatures: normal;
+            font-variant-numeric: normal;
+            font-variant-position: normal;
+            font-variation-settings: normal;
+            font-weight: 400;
+            line-height: 20px;
+            list-style-image: none;
+            list-style-position: inside;
+            list-style-type: none;
+            margin-bottom: 1.5px;
+            margin-left: 0px;
+            margin-right: 3px;
+            margin-top: 0px;
+            max-width: 100%;
+            padding-bottom: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            vertical-align: middle;
+            word-break: break-word;
+        }
+        .text-fragment {
+            border-bottom-color: rgb(31, 31, 35);
+            border-bottom-style: none;
+            border-bottom-width: 0px;
+            border-image-outset: 0;
+            border-image-repeat: stretch;
+            border-image-slice: 100%;
+            border-image-source: none;
+            border-image-width: 1;
+            border-left-color: rgb(31, 31, 35);
+            border-left-style: none;
+            border-left-width: 0px;
+            border-right-color: rgb(31, 31, 35);
+            border-right-style: none;
+            border-right-width: 0px;
+            border-top-color: rgb(31, 31, 35);
+            border-top-style: none;
+            border-top-width: 0px;
+            box-sizing: border-box;
+            color: rgb(31, 31, 35);
+            font-family: "Inter", "Roobert", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-feature-settings: normal;
+            font-kerning: auto;
+            font-language-override: normal;
+            font-optical-sizing: auto;
+            font-size: 13px;
+            font-size-adjust: none;
+            font-stretch: 100%;
+            font-style: normal;
+            font-variant: normal;
+            font-variant-alternates: normal;
+            font-variant-caps: normal;
+            font-variant-east-asian: normal;
+            font-variant-ligatures: normal;
+            font-variant-numeric: normal;
+            font-variant-position: normal;
+            font-variation-settings: normal;
+            font-weight: 400;
+            line-height: 20px;
+            list-style-image: none;
+            list-style-position: inside;
+            list-style-type: none;
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            vertical-align: baseline;
+            word-break: break-word
+        }
+        .chat-image{
+            border-bottom-color: rgb(31, 31, 35);
+            border-bottom-style: none;
+            border-bottom-width: 0px;
+            border-image-outset: 0;
+            border-image-repeat: stretch;
+            border-image-slice: 100%;
+            border-image-source: none;
+            border-image-width: 1;
+            border-left-color: rgb(31, 31, 35);
+            border-left-style: none;
+            border-left-width: 0px;
+            border-right-color: rgb(31, 31, 35);
+            border-right-style: none;
+            border-right-width: 0px;
+            border-top-color: rgb(31, 31, 35);
+            border-top-style: none;
+            border-top-width: 0px;
+            box-sizing: border-box;
+            color: rgb(31, 31, 35);
+            display: inline-block;
+            font-family: "Inter", "Roobert", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-feature-settings: normal;
+            font-kerning: auto;
+            font-language-override: normal;
+            font-optical-sizing: auto;
+            font-size: 13px;
+            font-size-adjust: none;
+            font-stretch: 100%;
+            font-style: normal;
+            font-variant: normal;
+            font-variant-alternates: normal;
+            font-variant-caps: normal;
+            font-variant-east-asian: normal;
+            font-variant-ligatures: normal;
+            font-variant-numeric: normal;
+            font-variant-position: normal;
+            font-variation-settings: normal;
+            font-weight: 400;
+            height: 28px;
+            line-height: 20px;
+            list-style-image: none;
+            list-style-position: inside;
+            list-style-type: none;
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            text-align: center;
+            vertical-align: middle;
+            width: 28px;
+            word-break: break-word;
+        }
+
+        .timestamp {
+            border-bottom-color: rgb(31, 31, 35);
+            border-bottom-style: none;
+            border-bottom-width: 0px;
+            border-image-outset: 0;
+            border-image-repeat: stretch;
+            border-image-slice: 100%;
+            border-image-source: none;
+            border-image-width: 1;
+            border-left-color: rgb(31, 31, 35);
+            border-left-style: none;
+            border-left-width: 0px;
+            border-right-color: rgb(31, 31, 35);
+            border-right-style: none;
+            border-right-width: 0px;
+            border-top-color: rgb(31, 31, 35);
+            border-top-style: none;
+            border-top-width: 0px;
+            box-sizing: border-box;
+            color: rgb(31, 31, 35);
+            font-family: "Inter", "Roobert", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-feature-settings: normal;
+            font-kerning: auto;
+            font-language-override: normal;
+            font-optical-sizing: auto;
+            font-size: 12px;
+            font-size-adjust: none;
+            font-stretch: 100%;
+            font-style: normal;
+            font-variant: normal;
+            font-variant-alternates: normal;
+            font-variant-caps: normal;
+            font-variant-east-asian: normal;
+            font-variant-ligatures: normal;
+            font-variant-numeric: normal;
+            font-variant-position: normal;
+            font-variation-settings: normal;
+            font-weight: 400;
+            line-height: 18px;
+            list-style-image: none;
+            list-style-position: inside;
+            list-style-type: none;
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 5px;
+            margin-top: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            text-align: right;
+            vertical-align: baseline;
+            white-space: nowrap;
+            word-break: break-word;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div>
+        <div>
+            <div>
+                <ul id='chat-div' style="min-height: 0px;"></ul>
+            </div>
+        </div>
+    </div>
+

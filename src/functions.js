@@ -6,6 +6,10 @@ const admin = require('firebase-admin');
 const PasteClient = require("pastebin-api").default;
 const searchGameVods = require("./search-vods/utils/searchGameVods");
 const pLimit = require('p-limit');
+const crypto = require('crypto');
+const { encode } = require('bs58');
+const { PrivatebinClient } = require('@pixelfactory/privatebin');
+const privatebin = new PrivatebinClient();
 
 const TOKEN = process.env.BearerToken;
 const Client_ID = process.env.Client_ID;
@@ -100,7 +104,7 @@ export function fireConfig() {
       "type": process.env.type,
       "project_id": process.env.project_id,
       "private_key_id": process.env.private_key_id,
-      "private_key": JSON.parse(process.env.private_key), /*.replace(/\\n/g, '\n')*/
+      "private_key": JSON.parse(process.env.private_key),
       "client_email": process.env.client_email,
       "client_id": process.env.client_id,
       "auth_uri": process.env.auth_uri,
@@ -183,7 +187,7 @@ function msToTime(duration) { // converts ms Time to a readeable time
     // hours = (hours < 10) ? "0" + hours : hours;
     // minutes = (minutes < 10) ? "0" + minutes : minutes;
 
-    var fullSeconds = seconds + milliseconds // milliseconds.toString().split('.')[1]
+    var fullSeconds = seconds + milliseconds; // milliseconds.toString().split('.')[1]
     // fullSeconds = (seconds < 10) ? "0" + fullSeconds : fullSeconds;
 
     if (days) {
@@ -244,25 +248,21 @@ export function getSub(cliente, idk, {...kwargs} = {}) {
 export async function getFollows(user_id) {
     const options = {method: "GET", headers: {'Client-ID': Client_ID, 'Authorization': `Bearer ${TOKEN}`}};
 
+    let cursor = true;
     var daFollows = [];
-    for (let i = 0;; i++) {
+    for (let i = 0; cursor; i++) {
         let daURL = `https://api.twitch.tv/helix/users/follows?from_id=${user_id}&first=100`;
-        const laTest = await fetch(i === 0 ? daURL : daURL + `&after=${daFollows[i - 1].pagination.cursor}`, options);
+        const laTest = await fetch(!i ? daURL : daURL + `&after=${cursor}`, options);
         const daJson = await laTest.json();
         daFollows[i] = daJson;
 
-        if (Object.keys(daJson.pagination).length === 0) break;
-
+        cursor = daFollows[i].pagination ? daFollows[i].pagination.cursor : null;
     }
 
     let daFo = [];
 
     for (let daResponse of daFollows) {
-        daResponse.data.forEach((daFollow) => {
-
-            daFo.push(daFollow.to_login);
-
-        });
+        daResponse.data.forEach(daFollow => daFo.push(daFollow.to_login));
     }
 
     return [daFo, daFollows[0].total];
@@ -312,7 +312,7 @@ export async function getCatsPlayed(followed = false, daGame, {...kwargs} = {}) 
 
     if (!followed) {
 
-        if (!vods || !vods[0]) { // if the response "searchGameVods" is an empty array
+        if (!vods || !vods.length) { // if the response "searchGameVods" is an empty array or is undefined
             return 'No Streamer Sadge';
 
         } else if (vods[0] === kwargs.daChannel) {
@@ -322,15 +322,14 @@ export async function getCatsPlayed(followed = false, daGame, {...kwargs} = {}) 
         return [streamersPlayed, streamersPlayed.length];
     }
 
-
     return vods;
 };
 
-export async function doPastebinShit(daText) {
+export async function doPastebinShit(daText, daName) {
     const url = await paste.createPaste({
         code: daText,
         expireDate: "10M",
-        name: "yourStreamerList.js",
+        name: daName,
         publicity: 0,
     });
     return url;
@@ -349,9 +348,198 @@ export async function gameExists(deGame) {
 
     const response = await fetch(`https://api.twitch.tv/helix/games?name=${deGame}`, options);
     const json = await response.json();
-    if (!json.data[0]) {
+    if (!json.data.length) {
         return false;
     } else {
         return true;
+    }
+}
+
+function secondsToHms(totalSeconds) {
+    let hours = Math.floor(totalSeconds / 3600);
+    totalSeconds %= 3600;
+    let minutes = Math.floor(totalSeconds / 60);
+    let seconds = Math.floor(totalSeconds % 60);
+
+    minutes = String(minutes).padStart(2, "0");
+    hours = String(hours).padStart(2, "0");
+    seconds = String(seconds).padStart(2, "0");
+
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) { 
+        return typeof args[number] != 'undefined'
+        ? args[number]
+        : match;
+    });
+};
+
+async function doPrivatebinShit(msg) {
+    const key = crypto.randomBytes(32); // getRandomValues(new Uint8Array(32));
+
+    const opts = {
+        expire: '10min',        // '5min' | '10min' | '1hour' | '1day' | '1week' | '1month' | '1year' | 'never'
+        burnafterreading: 0,    // 0 | 1
+        opendiscussion: 0,      // 0 | 1
+        output: 'text',         // 'text' | 'json' | 'yaml'
+        compression: 'zlib',    // 'none' | 'zlib'
+        textformat: 'plaintext' // 'plaintext' | 'markdown'
+    };
+
+    const paste = await privatebin.sendText(msg, key, opts);
+    paste.url = `https://privatebin.net${paste.url}#${encode(key)}`;
+    return paste.url;
+}
+
+export async function getComments(vodID) {
+
+    const client_id = process.env.client_id_gql;
+    
+    const optionsv5 = {method: "GET", headers: {'Client-ID': client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}};
+
+    const options = {method: "GET", headers: {'Client-ID': Client_ID, 'Authorization': `Bearer ${TOKEN}`}};
+
+    const vodRq = await fetch(`https://api.twitch.tv/helix/videos?id=${vodID}`, options);
+    const vodData = await vodRq.json();
+
+    const channelName = vodData.data[0].user_login;
+
+    let cursor = true;
+
+    let html = await fs.promises.readFile('./src/ref.html', 'utf-8');
+    let htmls = [];
+
+    const globalRq = await fetch(`https://badges.twitch.tv/v1/badges/global/display`, {method: 'GET'});
+    const globalBadges = await globalRq.json();
+
+    const subRq = await fetch(`https://badges.twitch.tv/v1/badges/channels/${await getUserID(channelName)}/display`, {method: 'GET'});
+    const subBadges = await subRq.json();
+
+    let colors = ['#0000FF', '#8A2BE2', '#5F9EA0', '#D2691E', '#FF7F50', '#1E90FF', '#B22222', '#DAA520', '#008000', '#FF69B4', '#FF4500', '#FF0000', '#2E8B57', '#00FF7F', '#9ACD32'];
+    
+    let userColor = {};
+
+    let daURL = `https://api.twitch.tv/kraken/videos/${vodID}/comments`;
+
+    for (let l = 0; cursor; l++) {
+        
+        const response = await fetch(!l ? daURL : `${daURL}?cursor=${cursor}`, optionsv5);
+        const json = await response.json();
+
+        cursor = '_next' in json ? json._next : null;
+        
+        if (l > 790) break;
+
+        for (let comment of json.comments) {
+            let userData = {
+                offset: comment.content_offset_seconds,
+                get badges() {
+                    let resultingArray = [];
+                    if ('user_badges' in comment.message) {
+                        comment.message.user_badges.forEach(e => {
+                            for (let badge in globalBadges.badge_sets) {
+                                if(badge === e._id) {
+                                    if (badge === 'subscriber' || badge === 'bits') {
+                                        let versionSubChecker = subBadges.badge_sets[e._id].versions[e.version] ? subBadges.badge_sets[e._id].versions[e.version] : subBadges.badge_sets[e._id].versions[Object.keys(subBadges.badge_sets[e._id].versions)[0]];
+                                        resultingArray.push([versionSubChecker.title, versionSubChecker.image_url_1x, versionSubChecker.image_url_2x, versionSubChecker.image_url_4x]);
+                                    } else {
+                                        let versionGlobalChecker = globalBadges.badge_sets[e._id].versions[e.version] ? globalBadges.badge_sets[e._id].versions[e.version] : globalBadges.badge_sets[e._id].versions[Object.keys(globalBadges.badge_sets[e._id].versions)[0]];
+                                        resultingArray.push([versionGlobalChecker.title, versionGlobalChecker.image_url_1x, versionGlobalChecker.image_url_2x, versionGlobalChecker.image_url_4x]);
+                                    }
+                                }
+                            }
+                        });
+                        return resultingArray;
+                    } else {
+                        return [];
+                    }
+                },
+                username: comment.commenter.display_name,
+                get user_link() {
+                    return `https://twitch.tv/${this.username}`;
+                },
+                get message() {
+                    if('fragments' in comment.message) {
+                        let frag = comment.message.fragments.map(fragment => {
+                            if (/\w{2}\.\w{2}/.test(fragment.text) && fragment.text.includes(' ')) {
+
+                                return fragment.text.split(/(\s)/).map(txt => { return {text: txt}; });
+                            } else {
+                                return fragment;
+                            }
+                        });
+                        return [].concat(...frag);
+                    }
+                    if('emoticons' in comment.message) { // if is highlight message
+                        let emoticons = [];
+
+                        comment.message.body.split(/(\s)/).forEach((word, i) => {
+                            emoticons.push({text: word});
+                            comment.message.emoticons.forEach(emote => {
+                                if (word.includes(comment.message.body.slice(emote.begin - 1, emote.end))) { // to detect in which part of the string is the emote
+                                    emoticons[i].emoticon = {emoticon_id: emote._id};
+                                }
+                            });    
+                        });
+                        return emoticons;
+                    }
+                    return [{text: comment.message.body}]; // if is highlight message and doesnt have emotes
+                }
+            }
+
+            if (!userColor[userData.username])
+                userColor[userData.username] = comment.message.user_color ? comment.message.user_color : colors[Math.floor(Math.random() * colors.length)];
+
+            html += `<li><span class="timestamp">${secondsToHms(userData.offset)} </span>`;
+
+            if (userData.badges.length) {
+                for (let [badgeName, badgeLink1, badgeLink2, badgeLink4] of userData.badges) {
+                    html += `<img alt="${badgeName}" title="${badgeName}" class="chat-badge" src="${badgeLink1}" srcset="${badgeLink1} 1x, ${badgeLink2} 2x, ${badgeLink4} 4x">`;
+                }
+            }
+
+            html += `<a class="user-display-link" target="_blank" href="${userData.user_link}"><span class="user-display" style="color: ${userColor[userData.username]}">${userData.username}</span></a><span class="text-fragment">: `;
+
+            userData.message.forEach(message => {
+                if('emoticon' in message) {
+                    let emoteLink = 'https://static-cdn.jtvnw.net/emoticons/v2/{0}/default/dark'.format(message.emoticon.emoticon_id);
+                    html += `<span><img class="chat-image chat-line__message--emote" src="${emoteLink}/1.0" srcset="${emoteLink}/1.0 1x, ${emoteLink}/2.0 2x, ${emoteLink}/3.0 4x"></span>`;
+                } else if (/\w{2}\.\w{2}/.test(message.text)) {
+                    let whitespaceRe = message.text.match(/\s+/);
+                    if(!message.text.trimStart().startsWith('https://')) message.text = whitespaceRe ? `${whitespaceRe}https://${message.text}` : `https://${message.text}`;
+                    html += `<a class="user-display-link" href="${message.text}"><span>${message.text}</span></a>`;
+                } else {
+                    html += `<span class="text-fragment">${message.text}</span>`;
+                }
+            });
+
+            html += `</span></li>`;
+
+            if (html.match(/\<li\>/ig).length >= 3000) {
+                html += `</body>\n\n</html>`;
+                htmls.push(html);
+                html = await fs.promises.readFile('./src/ref.html', 'utf-8');
+            }
+        }
+
+        if (!cursor && !(html.match(/\<li\>/ig).length > 3000)) {
+            html += `</body>\n\n</html>`;
+            htmls.push(html);
+        }
+    }
+
+    if (htmls.length > 0) {
+        let hlrq = [];
+        for (let hl of htmls) {
+            hlrq.push(await doPrivatebinShit(hl));
+        }
+        return hlrq;
+    } else {
+        html += `</body>\n\n</html>`;
+        let hlpaste = await doPrivatebinShit(html);
+        return hlpaste;
     }
 }
