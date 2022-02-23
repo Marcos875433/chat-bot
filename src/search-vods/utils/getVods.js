@@ -36,7 +36,7 @@ async function getVods(channel, client_id) {
 
         try {
             if (!json[0].data.user) return 'The channel is closed, or has been banned';
-            if (!json[0].data.user.videos.edges[0]) return 'The channel has no vods';
+            if (!json[0].data.user.videos.edges.length) return 'The channel has no vods';
             const edges = json[0].data.user.videos.edges;
 
             edges.forEach((VOD) => {
