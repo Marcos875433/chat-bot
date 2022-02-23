@@ -7,7 +7,7 @@ const fs = require('fs');
 const admin = require('firebase-admin');
 const split = require('shlex').split;
 
-import { findImage, top, getSub, fireConfig, checkList, checkChannel, checkConnection, doPastebinShit, getCatsPlayed, getFollows, getUserID, gameExists } from './functions';
+import { findImage, top, getSub, fireConfig, checkList, checkChannel, checkConnection, doPastebinShit, getCatsPlayed, getFollows, getUserID, gameExists, getComments } from './functions';
 
 (async() => {
 
@@ -121,7 +121,7 @@ client.on('chat', async(target, ctx, message, self) => {
         client.say(target, `COMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO BabyRage`);
     }
 
-    if(minuscula.match(/^\,sa(?![\w\d])/)) { // if the start of the comment match with ",sa" do this
+    if(minuscula.match(/^\,sa\s?/)) { // if the start of the comment match with ",sa" do this
         if (!saBlock) { // if sa is not blocked/timed out
             var sa = minuscula.split(' ');
             if (sa.length > 3) {
@@ -143,7 +143,7 @@ client.on('chat', async(target, ctx, message, self) => {
         }
     }
 
-    if(minuscula.match(/^\,streamed(?![\w\d])/) && !streamedBlock) { // ,streamed - [streamer] [game] || ["followed"] [game]
+    if(minuscula.match(/^\,streamed\s[\w\W]+/) && !streamedBlock) { // ,streamed - [streamer] [game] || ["followed"] [game]
         streamedBlock = true;
         let streamed = split(minuscula);
         if (streamed.length === 3) {
@@ -162,7 +162,7 @@ client.on('chat', async(target, ctx, message, self) => {
                     const daStreamers = daResponse[0].join(', ');
                     const daAmountOfStreamers = daResponse[1];
                     if(daStreamers.length > 500) {
-                        const daPaste = await doPastebinShit(daStreamers);
+                        const daPaste = await doPastebinShit(daStreamers, 'yourStreamerList.js');
                         client.say(target, `Aqui esta la lista de streamers que han jugado ${split(spaces)[2]} -> ${daPaste} , son ${daAmountOfStreamers} streamers PogChamp`);
                         streamedBlock = false;
                     } else {
@@ -195,24 +195,36 @@ client.on('chat', async(target, ctx, message, self) => {
         console.log(channelNames);
     }
 
-    if (minuscula.match(/^\,echo(?![\w\d])/i) && ctx.username === 'srsarcasmo01') {
+    if (minuscula.match(/^\,echo\s\w+/) && ctx.username === 'srsarcasmo01') {
         const daEcho = minuscula.split(' ');
         daEcho.shift();
         client.say(target, daEcho.join(' '));
     }
 
-    if (minuscula.match(/^\,myfollows(?![\w\d])/i)) {
+    if (minuscula.match(/^\,myfollows\s\w+/)) {
         const daUserID = await getUserID(botUserName);
         const myFollows = await getFollows(self ? daUserID : ctx['user-id']);
         let deFollows = myFollows[0].join(', ');
         const daAmountOfFollows = myFollows[1];
 
         if (deFollows.length > 500) {
-            const daPaste = await doPastebinShit(deFollows);
+            const daPaste = await doPastebinShit(deFollows, 'yourStreamerList.js');
             client.say(target, `aqui esta tu lista de follows ${daPaste} con ${daAmountOfFollows} follows`);
         } else {
             client.say(target, `${deFollows}`);
         }
+    }
+
+    if(minuscula.match(/^\,getcomments\s\w+/)) {
+        let args = minuscula.split(' ');
+        if (args.length === 2) {
+            let commentsResponse = await getComments(args[1]); // 1 is channel id
+            if (commentsResponse instanceof Array) {
+                client.say(target, `${commentsResponse.join(' , ')}`);
+            } else if (commentsResponse) {
+                client.say(target, `${commentsResponse}`);
+            }
+        } 
     }
 });
 })();

@@ -37,7 +37,7 @@ async function searchGameVods(channel, client_id, game) {
         const url = `https://www.twitch.tv/videos/${id}?t=${timestamp}`;*/
 
         if (milliseconds == 0) continue; // ignoramos el primer juego por lo de antes
-        if (!momentGame) continue; // no tiene juego
+        if (!momentGame) continue; // no tiene juego || game is e.g. "Chapter 7"
         if (momentGame.displayName.toLowerCase() == game.toLowerCase()) {
             if (!response[0]) { // if the channel has not been pushed
                 response.push(channel); // push(url)
