@@ -14,6 +14,7 @@ const privatebin = new PrivatebinClient();
 const TOKEN = process.env.BearerToken;
 const Client_ID = process.env.Client_ID;
 const paste = new PasteClient(process.env.pastebin_dev_key);
+const userToken = process.env.myUserToken;
 
 export function findImage(strParameter, regeParameter, regeParameter2, idk, cliente) {
 
@@ -542,4 +543,46 @@ export async function getComments(vodID) {
         let hlpaste = await doPrivatebinShit(html);
         return hlpaste;
     }
+}
+
+export async function getFollowedStreams(user_id, gameName) {
+    const options = {method: "GET", headers: {'Client-ID': Client_ID, 'Authorization': `Bearer ${userToken}`}};
+
+    let cursor = true;
+    let daURL = `https://api.twitch.tv/helix/streams/followed?user_id=${user_id}`;
+    let daStreamsArr = [];
+    for (let i = 0; cursor; i++) {
+        const response = await fetch(!i ? daURL : daURL + `&after=${cursor}`, options);
+        const daJson = await response.json();
+        daStreamsArr[i] = daJson;
+
+        cursor = Object.keys(daJson.pagination).length ? daJson.pagination.cursor : null
+    }
+
+    let daStreamers = [];
+    let daCount = 0;
+
+    /*fs.writeFile('leStreams.json', JSON.stringify(daStreamsArr), (err) => {
+        if (err) {
+            console.log(err)
+            return;
+        } else {
+            console.log('PogChamp')
+        }
+    });*/
+
+    if (!daStreamsArr[0].data.length) { // if no one is streaming
+        return ['No one is streaming'];
+    }
+
+    daStreamsArr.forEach(pagination => {
+        pagination.data.forEach(stream => {
+            if (stream.game_name.toLowerCase() === gameName) {
+                daStreamers.push(stream.user_name);
+                daCount++;
+            }
+        });
+    });
+
+    return [daStreamers, daCount];
 }
