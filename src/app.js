@@ -7,7 +7,7 @@ const fs = require('fs');
 const admin = require('firebase-admin');
 const split = require('shlex').split;
 
-import { findImage, top, getSub, fireConfig, checkList, checkChannel, checkConnection, doPastebinShit, getCatsPlayed, getFollows, getUserID, gameExists, getComments } from './functions';
+import { findImage, top, getSub, fireConfig, checkList, checkChannel, checkConnection, doPastebinShit, getCatsPlayed, getFollows, getUserID, gameExists, getComments, getFollowedStreams } from './functions';
 
 (async() => {
 
@@ -225,6 +225,34 @@ client.on('chat', async(target, ctx, message, self) => {
                 client.say(target, `${commentsResponse}`);
             }
         } 
+    }
+
+    if (minuscula.match(/^\,getfollowedstreams\s[\w\W]+/) && ctx.username == 'srsarcasmo01') {
+        console.log('yeabro');
+        if (split(minuscula).length > 2) {
+            client.say(target, 'Asi no es TONTO BabyRage');
+            return;
+        }
+        if (!await gameExists(split(minuscula)[1])) {
+            client.say(target, 'El juego/categoria no existe FeelsDankMan');
+            return;
+        }
+        let daStreams = await getFollowedStreams(ctx['user-id'], split(minuscula)[1]);
+        if (daStreams[0] == 'No one is streaming') {
+            client.say(target, `Nadie que sigas esta streameando, literalmente`);
+            return;
+        }
+        if (!daStreams[0].length) {
+            client.say(target, `Nadie que sigas esta streameando ${split(spaces)[1]}`);
+            return;
+        }
+        let daStreamersString = daStreams[0].join(', ');
+        if (daStreamersString.length > 500) {
+            const daPaste = await doPastebinShit(daStreamersString, 'yourFollowedStreamsList.js');
+            client.say(target, `Estos son los streamers que estan stremeando ${split(spaces)[1]}: ${daPaste} . Son ${daStreams[1]} streams`);
+        } else {
+            client.say(target, `${daStreamersString}`);
+        }
     }
 });
 })();
