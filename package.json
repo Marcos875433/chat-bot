@@ -20,7 +20,7 @@
     "firebase-admin": "^10.0.2",
     "jquery": "^3.6.0",
     "node-fetch": "^2.6.7",
-    "nodemon": "^2.0.15",
+    "nodemon": "^2.0.20",
     "p-limit": "3.1.0",
     "pastebin-api": "^3.0.0",
     "random-reddit": "^2.0.1",
